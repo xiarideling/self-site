@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#fdf8f1" />
+  <title>夏日の苓 · 个人站</title>
+  <meta name="description" content="一个长期更新的个人站：试用过的 AI Agent，以及亲手拆开的神经网络。" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html"><img class="brand-avatar" src="assets/img/avatar.jpg" alt="" data-avatar />夏日の苓</a>
+      <div class="nav-links">
+        <a class="nav-link" href="agents.html">试用过的 Agent</a>
+        <a class="nav-link" href="mlp.html">MLP 实验室</a>
+        <a class="nav-link" href="#about">关于</a>
+      </div>
+      <button class="icon-btn" data-theme-toggle type="button" aria-label="切换主题">☀</button>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero wrap">
+      <div class="hero-top reveal">
+        <img class="avatar" src="assets/img/avatar.jpg" alt="夏日の苓的头像" data-avatar />
+        <div class="hero-hello">
+          <b>嗨，我是夏日の苓</b>
+          <span>这里记着我用过的东西，和我拆过的东西</span>
+        </div>
+      </div>
+      <h1 class="reveal">我用过很多 <em>Agent</em>，<br />也想亲手拆开一台 <em>会学习的机器</em>。</h1>
+      <p class="lead reveal">
+        不放简历。左边记我试过的 Agent——哪些真的帮上忙，哪些只是看起来很忙；
+        右边是一台能拧旋钮的小网络，你能看着它从乱猜，慢慢学会把两类点分开。
+      </p>
+
+      <div class="hero-meta reveal">
+        <span>更新 <b>2026.11</b></span>
+        <span>纯静态 <b>· GitHub Pages</b></span>
+        <span>无追踪 <b>· 无后端</b></span>
+      </div>
+
+      <div class="entries">
+        <a class="entry reveal" href="agents.html">
+          <div class="entry-kicker">01 / Agents</div>
+          <h3>我试用过的 Agent</h3>
+          <p>两条记录：一条还在每天用，一条已经停了。为什么留下、为什么停，都写在里面。</p>
+          <div class="entry-arrow">→ 打开清单</div>
+        </a>
+        <a class="entry reveal" href="mlp.html">
+          <div class="entry-kicker">02 / MLP Lab</div>
+          <h3>MLP 学习实验室</h3>
+          <p>从零实现的多层感知机：改层数、学习率、激活函数，看决策边界和参数怎么一步步变。</p>
+          <div class="entry-arrow">→ 动手训练</div>
+        </a>
+      </div>
+    </section>
+
+    <section id="about" class="wrap section">
+      <div class="eyebrow reveal">About</div>
+      <h2 class="reveal">关于这个站</h2>
+      <p class="reveal">
+        这是一个纯静态的小站，没有数据库、没有登录，所有交互都在浏览器里跑。
+        MLP 那一页没有任何机器学习库——矩阵乘法、反向传播、优化器都是手写的 JavaScript，
+        所以你看到的每一个数字，都是当场算出来的。
+      </p>
+      <p class="reveal">
+        为什么要自己做一遍？因为调包能跑通，但说不清为什么能跑通。把梯度推导、参数更新、
+        学习率的影响做成能看见的东西，比读十篇教程都直接。
+      </p>
+
+      <div class="rows reveal">
+        <div class="row">
+          <div class="when">现在</div>
+          <div class="what"><strong>MLP 实验室</strong><span>正在补：多层网络的梯度消失演示</span></div>
+          <div class="where">mlp.html</div>
+        </div>
+        <div class="row">
+          <div class="when">2026.11</div>
+          <div class="what"><strong>站点上线</strong><span>导航、Agent 清单、MLP 可视化第一版</span></div>
+          <div class="where">—</div>
+        </div>
+        <div class="row">
+          <div class="when">长期</div>
+          <div class="what"><strong>持续记录</strong><span>用过就写，不追热点，只留下结论</span></div>
+          <div class="where">—</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>别往下翻了，你已经发现了最底下的我了哦~</div>
+      <div><a href="agents.html">Agents</a> · <a href="mlp.html">MLP Lab</a></div>
+    </div>
+  </footer>
+
+  <script src="assets/js/site.js"></script>
+</body>
+</html>
