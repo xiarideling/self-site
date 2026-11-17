@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#fdf8f1" />
+  <title>MLP 实验室 · 夏日の苓</title>
+  <meta name="description" content="从零实现的多层感知机：改层数、学习率、激活函数，看决策边界和权重怎么一步步变。" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html"><img class="brand-avatar" src="assets/img/avatar.jpg" alt="" data-avatar />夏日の苓</a>
+      <div class="nav-links">
+        <a class="nav-link" href="agents.html">试用过的 Agent</a>
+        <a class="nav-link" href="mlp.html">MLP 实验室</a>
+        <a class="nav-link" href="index.html#about">关于</a>
+      </div>
+      <button class="icon-btn" data-theme-toggle type="button" aria-label="切换主题">☀</button>
+    </div>
+  </nav>
+
+  <main>
+    <header class="wrap section-sm" style="padding-top:3.6rem">
+      <div class="eyebrow reveal">02 / MLP Lab</div>
+      <h1 class="reveal" style="font-size:clamp(2rem,4.4vw,3rem)">把「学习」拆开看</h1>
+      <p class="lead reveal">
+        一台真的会训练的多层感知机。改改层数、学习率、激活函数，看它怎么从乱猜慢慢把两类点分开。
+        所有数字都在你的浏览器里现算，没有 PyTorch，没有 TensorFlow。
+      </p>
+    </header>
+
+    <!-- ============ 实验台 ============ -->
+    <section class="wrap" style="padding-top:1.8rem">
+      <div class="lab">
+        <!-- 左：控制 -->
+        <div class="lab-col">
+          <div class="panel">
+            <div class="panel-title">超参数<span class="mono" style="font-size:.66rem">可随时改</span></div>
+
+            <div class="ctrl">
+              <div class="ctrl-label"><span>数据集</span></div>
+              <select id="ctlDataset">
+                <option value="circle" selected>同心圆</option>
+                <option value="xor">异或</option>
+                <option value="spiral">双螺旋</option>
+                <option value="moons">双月</option>
+                <option value="gauss">高斯团</option>
+              </select>
+              <p class="small dim" id="hint" style="margin:.45rem 0 0">线性不可分，需要至少一个隐藏层</p>
+            </div>
+
+            <div class="ctrl">
+              <div class="ctrl-label"><span>隐藏层数</span></div>
+              <select id="ctlHidden">
+                <option value="1" selected>1 层</option>
+                <option value="2">2 层</option>
+                <option value="3">3 层</option>
+              </select>
+            </div>
+
+            <div class="ctrl">
+              <div class="ctrl-label"><span>每层神经元</span></div>
+              <select id="ctlNeurons">
+                <option value="2">2 个</option>
+                <option value="3">3 个</option>
+                <option value="4">4 个</option>
+                <option value="6" selected>6 个</option>
+                <option value="8">8 个</option>
+              </select>
+            </div>
+
+            <div class="ctrl">
+              <div class="ctrl-label"><span>激活函数</span></div>
+              <select id="ctlAct">
+                <option value="relu" selected>ReLU（max(0, z)）</option>
+                <option value="tanh">tanh</option>
+                <option value="sigmoid">Sigmoid</option>
+              </select>
+            </div>
+
+            <div class="ctrl">
+              <div class="ctrl-label"><span>学习率 lr</span><b id="ctlLrOut">0.100</b></div>
+              <input type="range" id="ctlLr" min="0" max="100" step="1" value="67" />
+            </div>
+
+            <div class="ctrl">
+              <div class="ctrl-label"><span>L2 正则</span><b id="ctlRegOut">关</b></div>
+              <input type="range" id="ctlReg" min="0" max="10" step="0.5" value="0" />
+            </div>
+
+            <div class="ctrl">
+              <div class="ctrl-label"><span>批量大小</span></div>
+              <select id="ctlBatch">
+                <option value="1">1（逐样本）</option>
+                <option value="8">8</option>
+                <option value="16" selected>16</option>
+                <option value="32">32</option>
+                <option value="64">64</option>
+              </select>
+            </div>
+
+            <div class="ctrl">
+              <div class="ctrl-label"><span>优化器</span></div>
+              <select id="ctlOpt">
+                <option value="sgd" selected>随机梯度下降</option>
+                <option value="momentum">动量</option>
+                <option value="adam">Adam</option>
+              </select>
+            </div>
+
+            <div class="ctrl">
+              <div class="ctrl-label"><span>数据噪声</span><b id="ctlNoiseOut">0.08</b></div>
+              <input type="range" id="ctlNoise" min="0" max="40" step="1" value="8" />
+            </div>
+
+            <div class="ctrl">
+              <div class="ctrl-label"><span>训练速度</span><b id="ctlSpeedOut">6 步/秒</b></div>
+              <input type="range" id="ctlSpeed" min="1" max="20" step="1" value="6" />
+            </div>
+
+            <div class="btn-row" style="margin-top:1.1rem">
+              <button class="btn primary" id="btnRun" aria-pressed="false">开始训练</button>
+              <button class="btn" id="btnStep">单步 ×5</button>
+              <button class="btn ghost" id="btnReset">重置</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 中：图 -->
+        <div class="lab-col">
+          <div class="panel">
+            <div class="panel-title">
+              <span>网络 · 权重与激活</span>
+              <span class="mono" style="font-size:.66rem">线宽 = |w|　<span style="color:var(--cyan)">青</span>正 / <span style="color:#f87171">红</span>负</span>
+            </div>
+            <canvas id="netCanvas"></canvas>
+            <p class="small dim" style="margin:.5rem 0 0">
+              探针在 (x₁, x₂) 处的输出 <b class="mono" id="probeVal">—</b> —— 把鼠标移到下面的决策边界上，整张网络会亮起来。
+            </p>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title"><span>决策边界</span><span class="mono" style="font-size:.66rem">蓝 = 0 类　琥珀 = 1 类</span></div>
+            <canvas id="boundaryCanvas" style="cursor:crosshair"></canvas>
+            <div class="legend">
+              <span><i style="background:#bcd8ff"></i>类别 0</span>
+              <span><i style="background:#ffd79a"></i>类别 1</span>
+              <span><i style="background:#fff"></i>探针</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：指标 -->
+        <div class="lab-col side">
+          <div class="panel">
+            <div class="panel-title">实时指标</div>
+            <div class="stats">
+              <div class="stat"><div class="k">步数</div><div class="v" id="statStep">0</div></div>
+              <div class="stat"><div class="k">相当于轮次</div><div class="v" id="statReal">0.0</div></div>
+              <div class="stat"><div class="k">损失 loss</div><div class="v" id="statLoss">0.000</div></div>
+              <div class="stat"><div class="k">准确率</div><div class="v" id="statAcc">0.0%</div></div>
+              <div class="stat"><div class="k">参数量</div><div class="v" id="statParams">0</div></div>
+              <div class="stat"><div class="k">网络</div><div class="v" style="font-size:.9rem">2 → h → 1</div></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">损失 / 准确率</div>
+            <canvas id="lossCanvas"></canvas>
+            <div class="legend" style="padding-top:.4rem">
+              <span><i style="background:#5eead4"></i>loss（左轴）</span>
+              <span><i style="background:#f6b95c"></i>准确率（0–100%）</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">权重矩阵<span class="mono" style="font-size:.66rem">W1 W2</span></div>
+            <canvas id="wCanvas"></canvas>
+            <p class="small dim" style="margin:.4rem 0 0">每一格是一个权重，颜色深浅 = 绝对值大小。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 手算 ============ -->
+    <section class="wrap section">
+      <div class="eyebrow reveal">03 / 手算</div>
+      <h2 class="reveal">一次训练，就是三行算术</h2>
+      <p class="lead reveal">
+        凌晨两点，猫在门口叫，你困得睁不开眼，最后还是爬起来开了个罐头。
+        这个决定其实可以用一个 2 → 3 → 1 的小网络算出来：三个念头投个票，
+        谁赞成、谁反对，最后得到一个概率。点一轮三个按钮，它从 77% 涨到 92%；
+        多来二十轮，98% 往上。
+      </p>
+
+      <div class="hc-grid reveal">
+        <div class="panel">
+          <div class="panel-title">要不要开罐头 · 2 → 3 → 1</div>
+          <p class="small dim" style="margin:0 0 .8rem">
+            输入 x = [0.80, 0.40]：猫叫得有多惨、我有多困。标签 y = 1：最后确实爬起来了。
+          </p>
+          <div class="scroll-x" id="hcTable1"></div>
+          <div style="height:.55rem"></div>
+          <div class="scroll-x" id="hcTable2"></div>
+
+          <div class="hc-out">
+            <div class="hc-probline">
+              <span>开罐头的概率</span>
+              <b class="mono" id="hcProb">—</b>
+            </div>
+            <div class="hc-track"><i id="hcBar"></i></div>
+            <div class="small dim" style="margin-top:.35rem">
+              损失 L = <span class="mono" id="hcLoss">—</span> · 已更新 <span class="mono" id="hcRounds">0</span> 次
+            </div>
+          </div>
+
+          <div class="btn-row" style="margin-top:1rem">
+            <button class="btn primary" id="hcForward">① 前向</button>
+            <button class="btn" id="hcBackward" disabled>② 反向</button>
+            <button class="btn" id="hcUpdate" disabled>③ 更新</button>
+            <button class="btn ghost" id="hcReset">重置</button>
+          </div>
+
+          <div class="ctrl" style="margin-top:1rem">
+            <div class="ctrl-label"><span>学习率 lr</span><b id="hcLrOut">1.0</b></div>
+            <input type="range" id="hcLr" min="0.1" max="2" step="0.1" value="1" />
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">这一步发生了什么</div>
+          <div class="hc-log mono" id="hcLog"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 原理 ============ -->
+    <section class="wrap section">
+      <div class="eyebrow reveal">04 / 参数</div>
+      <h2 class="reveal">这些参数分别在管什么</h2>
+      <div class="cards4 reveal">
+        <div class="panel">
+          <h3 style="font-size:1rem">权重 W 与偏置 b</h3>
+          <p class="small">权重决定「多在意某个输入」，偏置决定「本来就想不想发火」。训练唯一在做的事，就是反复微调这两堆数字。</p>
+        </div>
+        <div class="panel">
+          <h3 style="font-size:1rem">学习率 lr</h3>
+          <p class="small">每步走多远。太小：爬到一半就停；太大：在谷底来回横跳，甚至炸成 NaN。试试把它拉到 0.5 以上。</p>
+        </div>
+        <div class="panel">
+          <h3 style="font-size:1rem">激活函数</h3>
+          <p class="small">没有它，多层网络会塌缩成一层线性模型。ReLU 硬、tanh 平滑、Sigmoid 会饱和——边界形状会明显不同。</p>
+        </div>
+        <div class="panel">
+          <h3 style="font-size:1rem">批量与正则</h3>
+          <p class="small">批量小：更新频繁但对噪声敏感；批量大：更稳但更慢。L2 正则会惩罚过大的权重，把边界磨得更平滑。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 代码 ============ -->
+    <section class="wrap section">
+      <div class="eyebrow reveal">05 / 实现</div>
+      <h2 class="reveal">它就是这几段代码</h2>
+      <p class="lead reveal">
+        页面上跑的引擎在这个文件里：<code class="mono small">assets/js/mlp-engine.js</code>。下面是抽出来的关键几段，
+        和页面里的实现一一对应。
+      </p>
+
+      <div class="code-wrap reveal" style="margin-top:1.4rem">
+        <div class="code-tabs" role="tablist">
+          <button class="code-tab" role="tab" data-code="forward" aria-selected="true">前向传播</button>
+          <button class="code-tab" role="tab" data-code="backward">反向传播</button>
+          <button class="code-tab" role="tab" data-code="update">参数更新</button>
+          <button class="code-tab" role="tab" data-code="params">参数量</button>
+        </div>
+        <pre class="code-body" id="codeBody"></pre>
+      </div>
+
+      <details class="fold reveal" style="margin-top:1rem">
+        <summary>为什么输出层用 Sigmoid + 交叉熵？</summary>
+        <p class="small">
+          因为这样输出可以解释成概率，而且梯度会化简成 ŷ − y。
+          如果输出层用均方误差，梯度里会多乘一个 σ′(z)，预测错得越离谱、梯度反而越小，学得越慢。
+          这也是为什么分类任务基本都用交叉熵。
+        </p>
+      </details>
+
+      <details class="fold reveal" style="margin-top:.6rem">
+        <summary>隐藏层的神经元到底在做什么？</summary>
+        <p class="small">
+          每个隐藏神经元是一条直线（2 维输入时就是平面上的直线），激活函数决定它只在一侧“发言”。
+          多个神经元组合起来，就能围出弯曲的区域。层数越多，能围出的形状越复杂——
+          但也越容易过拟合，这也是为什么上面的噪声和 L2 旋钮值得玩一玩。
+        </p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>别往下翻了，你已经发现了最底下的我了哦~</div>
+      <div><a href="agents.html">Agents</a> · <a href="mlp.html">MLP Lab</a></div>
+    </div>
+  </footer>
+
+  <script src="assets/js/site.js"></script>
+  <script src="assets/js/mlp-engine.js"></script>
+  <script src="assets/js/mlp-lab.js"></script>
+  <script src="assets/js/handcalc.js"></script>
+</body>
+</html>
