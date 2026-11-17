@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#fdf8f1" />
+  <title>试用过的 Agent · 夏日の苓</title>
+  <meta name="description" content="按场景整理的 AI Agent 实测记录：它替你做了什么，又在哪里翻车。" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html"><img class="brand-avatar" src="assets/img/avatar.jpg" alt="" data-avatar />夏日の苓</a>
+      <div class="nav-links">
+        <a class="nav-link" href="agents.html">试用过的 Agent</a>
+        <a class="nav-link" href="mlp.html">MLP 实验室</a>
+        <a class="nav-link" href="index.html#about">关于</a>
+      </div>
+      <button class="icon-btn" data-theme-toggle type="button" aria-label="切换主题">☀</button>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <header class="section-sm" style="padding-top:3.6rem">
+      <div class="eyebrow reveal">01 / Agents</div>
+      <h1 class="reveal" style="font-size:clamp(2rem,4.4vw,3rem)">我试用过的 Agent</h1>
+      <p class="lead reveal">
+        不是榜单，是使用记录。判断标准只有一条：<strong>它有没有真的减少我动手的时间</strong>。
+        演示好看但需要反复纠正的，最后都进了「弃用」。
+      </p>
+    </header>
+
+    <div class="filters" id="filterBar" role="group" aria-label="按用途筛选"></div>
+
+    <div class="agent-grid" id="agentGrid"></div>
+
+    <p class="small dim" style="margin-top:1.2rem">
+      共 <span id="agentCount">0</span> 个 · 状态里「常用」是还在日常用，「在试」是刚上手，「弃用」是已经停了。
+    </p>
+
+    <hr class="sep" />
+
+    <section class="section-sm" style="padding-top:0">
+      <h2 class="reveal" style="font-size:1.4rem">我怎么判断一个 Agent 值不值得留下</h2>
+      <div class="rows reveal">
+        <div class="row">
+          <div class="when">看返工率</div>
+          <div class="what"><strong>纠正它的时间 &lt; 自己做的时间</strong><span>这条不过，其他优点都不算数</span></div>
+        </div>
+        <div class="row">
+          <div class="when">看边界</div>
+          <div class="what"><strong>它知不知道自己不会</strong><span>会编造的，比会拒绝的难用得多</span></div>
+        </div>
+        <div class="row">
+          <div class="when">看复利</div>
+          <div class="what"><strong>用得越久是否越省事</strong><span>能记住项目和习惯的，才值得长期留</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>别往下翻了，你已经发现了最底下的我了哦~</div>
+      <div><a href="agents.html">Agents</a> · <a href="mlp.html">MLP Lab</a></div>
+    </div>
+  </footer>
+
+  <script src="assets/js/site.js"></script>
+  <script src="assets/js/agents-data.js"></script>
+  <script src="assets/js/agents.js"></script>
+</body>
+</html>
